@@ -1,11 +1,14 @@
-const crypto = require('crypto');
+const NOT_AUTHORIZATION = 401;
 
-const HTTP_OK_STATUS = 200;
-
-const validateToken = (_req, res) => {
-    const token = crypto.randomBytes(8).toString('hex');
-
-  res.status(HTTP_OK_STATUS).json({ token });
+const validateToken = (req, res, next) => {
+    const { authorization } = req.headers;
+    if (!authorization) {
+        return res.status(NOT_AUTHORIZATION).json({ message: 'Token não encontrado' });
+    }
+    if (authorization.length !== 16) {
+        return res.status(NOT_AUTHORIZATION).json({ message: 'Token inválido' });
+    }
+    next();
 };
 
 module.exports = {
