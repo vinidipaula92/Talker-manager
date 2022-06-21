@@ -1,7 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const { readContentFile } = require('./utils/readContentFile');
-const { writeContentFile } = require('./utils/writeContentFile');
 const { generatorToken } = require('./middlewares/generatorToken');
 const { validateToken } = require('./middlewares/validateToken');
 const { validateEmail } = require('./middlewares/validateEmail');
@@ -11,6 +10,8 @@ const { validateTalk } = require('./middlewares/validateTalk');
 const { validateWatchedAt } = require('./middlewares/validateWatchedAt');
 const { validateAge } = require('./middlewares/validateAge');
 const { validateName } = require('./middlewares/validateName');
+const { newTalker } = require('./middlewares/newTalker');
+const { putTalker } = require('./middlewares/putTalker');
 
 const app = express();
 app.use(bodyParser.json());
@@ -18,7 +19,6 @@ app.use(bodyParser.json());
 const HTTP_OK_STATUS = 200;
 const PORT = '3000';
 const HTTP_NOT_FOUND_PORT = 404;
-const HTTP_OK = 201;
 
 // não remova esse endpoint, e para o avaliador funcionar
 app.get('/', (_request, response) => {
@@ -53,23 +53,16 @@ validateAge,
 validateTalk,
 validateWatchedAt,
 validateRate,
-async (req, res) => {
-  const talkers = await readContentFile();
-  const { name, age, talk } = req.body;
-  const { watchedAt, rate } = talk;
-  const addNewTalker = {
-    id: (talkers.length + 1),
-    name,
-    age,
-    talk: {
-      watchedAt,
-      rate,
-    },
-  };
-  talkers.push(addNewTalker);
-  writeContentFile(talkers);
-  return res.status(HTTP_OK).json(addNewTalker);
-  });
+newTalker);
+
+app.put('/talker/:id',
+validateToken,
+validateName,
+validateAge,
+validateTalk,
+validateWatchedAt,
+validateRate,
+putTalker);
 
 app.listen(PORT, () => {
   console.log('Online');
