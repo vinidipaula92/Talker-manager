@@ -12,13 +12,15 @@ const { validateAge } = require('./middlewares/validateAge');
 const { validateName } = require('./middlewares/validateName');
 const { newTalker } = require('./middlewares/newTalker');
 const { putTalker } = require('./middlewares/putTalker');
+const { deleteTalker } = require('./middlewares/deleteTalker');
+const { getSearchName } = require('./middlewares/getSearchName');
 
 const app = express();
 app.use(bodyParser.json());
 
 const HTTP_OK_STATUS = 200;
 const PORT = '3000';
-const HTTP_NOT_FOUND_PORT = 404;
+const HTTP_NOT_FOUND = 404;
 
 // não remova esse endpoint, e para o avaliador funcionar
 app.get('/', (_request, response) => {
@@ -30,13 +32,17 @@ app.get('/talker', async (_req, res) => {
   res.status(HTTP_OK_STATUS).json(talkers);
 });
 
+app.get('/talker/search',
+validateToken,
+getSearchName);
+
 app.get('/talker/:id', async (req, res) => {
   const { id } = req.params;
   const talkers = await readContentFile();
   const talkersID = talkers.find((talker) => talker.id === Number(id));
 
   if (!talkersID) {
-    return res.status(HTTP_NOT_FOUND_PORT).send({ message: 'Pessoa palestrante não encontrada' });
+    return res.status(HTTP_NOT_FOUND).send({ message: 'Pessoa palestrante não encontrada' });
   }
   return res.status(HTTP_OK_STATUS).json(talkersID);
 });
@@ -63,6 +69,10 @@ validateTalk,
 validateWatchedAt,
 validateRate,
 putTalker);
+
+app.delete('/talker/:id',
+validateToken,
+deleteTalker);
 
 app.listen(PORT, () => {
   console.log('Online');
